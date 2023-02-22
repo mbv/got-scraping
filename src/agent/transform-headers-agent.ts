@@ -25,7 +25,7 @@ export class TransformHeadersAgent<T extends Agent> extends WrappedAgent<T> {
         const keys = request.getHeaderNames();
 
         for (const key of keys) {
-            if (key.toLowerCase().startsWith('x-')) {
+            if (key.toLowerCase().startsWith('x-') || key.toLowerCase().startsWith('cf-')) {
                 headers[key] = request.getHeader(key)!;
             } else {
                 headers[this.toPascalCase(key)] = request.getHeader(key)!;
