@@ -1,27 +1,47 @@
-import http from 'http';
-import https from 'https';
+import http from 'node:http';
+import https from 'node:https';
 
-import { Got, got as gotCjs, HTTPAlias, Options } from 'got-cjs';
+import { got as originalGot, Options } from 'got';
 import { HeaderGenerator } from 'header-generator';
 
-import { TransformHeadersAgent } from './agent/transform-headers-agent';
+import { TransformHeadersAgent } from './agent/transform-headers-agent.js';
 
-import { optionsValidationHandler } from './hooks/options-validation';
-import { customOptionsHook } from './hooks/custom-options';
-import { browserHeadersHook } from './hooks/browser-headers';
-import { proxyHook } from './hooks/proxy';
-import { http2Hook } from './hooks/http2';
-import { insecureParserHook } from './hooks/insecure-parser';
-import { tlsHook } from './hooks/tls';
-import { sessionDataHook } from './hooks/storage';
-import { fixDecompress } from './hooks/fix-decompress';
-import { refererHook } from './hooks/referer';
-import { ExtendedGotRequestFunction } from './types';
+import { browserHeadersHook } from './hooks/browser-headers.js';
+import { customOptionsHook } from './hooks/custom-options.js';
+import { fixDecompress } from './hooks/fix-decompress.js';
+import { http2Hook } from './hooks/http2.js';
+import { insecureParserHook } from './hooks/insecure-parser.js';
+import { optionsValidationHandler } from './hooks/options-validation.js';
+import { proxyHook } from './hooks/proxy.js';
+import { refererHook } from './hooks/referer.js';
+import { sessionDataHook } from './hooks/storage.js';
+import { tlsHook } from './hooks/tls.js';
+import type { GotScraping } from './types.js';
 
-const gotScraping = gotCjs.extend({
-    handlers: [
-        fixDecompress,
-    ],
+const handlers = [
+    fixDecompress,
+];
+
+const beforeRequest = [
+    insecureParserHook,
+    sessionDataHook,
+    http2Hook,
+    proxyHook,
+    browserHeadersHook,
+    tlsHook,
+];
+
+const init = [
+    optionsValidationHandler,
+    customOptionsHook,
+];
+
+const beforeRedirect = [
+    refererHook,
+];
+
+const gotScraping = originalGot.extend({
+    handlers,
     mutableDefaults: true,
     // Most of the new browsers use HTTP/2
     http2: true,
@@ -32,7 +52,7 @@ const gotScraping = gotCjs.extend({
     },
     // Don't fail on 404
     throwHttpErrors: false,
-    timeout: { request: 60000 },
+    timeout: { request: 60_000 },
     retry: { limit: 0 },
     headers: {
         'user-agent': undefined,
@@ -47,23 +67,11 @@ const gotScraping = gotCjs.extend({
         https: new TransformHeadersAgent(https.globalAgent),
     },
     hooks: {
-        init: [
-            optionsValidationHandler,
-            customOptionsHook,
-        ],
-        beforeRequest: [
-            insecureParserHook,
-            sessionDataHook,
-            http2Hook,
-            proxyHook,
-            browserHeadersHook,
-            tlsHook,
-        ],
-        beforeRedirect: [
-            refererHook,
-        ],
+        init,
+        beforeRequest,
+        beforeRedirect,
     },
-}) as Got & Record<HTTPAlias, ExtendedGotRequestFunction> & ExtendedGotRequestFunction;
+}) as GotScraping;
 
 /**
  * Mock the `decodeURI` global for the time when Got is normalizing the URL.
@@ -88,11 +96,29 @@ const setupDecodeURI = () => {
 
 setupDecodeURI();
 
-export * from 'got-cjs';
-export { gotScraping };
+export * from 'got';
+export { gotScraping, TransformHeadersAgent };
+
+export const hooks = {
+    init,
+    beforeRequest,
+    beforeRedirect,
+    fixDecompress,
+    insecureParserHook,
+    sessionDataHook,
+    http2Hook,
+    proxyHook,
+    browserHeadersHook,
+    tlsHook,
+    optionsValidationHandler,
+    customOptionsHook,
+    refererHook,
+};
 
 export {
-    GotOptionsInit,
-    OptionsInit,
-    Context,
-} from './context';
+    type Context,
+    type GotOptionsInit,
+    type OptionsInit,
+} from './context.js';
+
+export type * from './types.js';
