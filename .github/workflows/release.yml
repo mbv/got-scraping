@@ -32,7 +32,7 @@ jobs:
   # and triggering of docker image builds in the apify-actor-docker repo.
   deploy:
     name: Publish to NPM
-    needs: [build_and_test, lint]
+    needs: [lint]
     runs-on: ubuntu-latest
     steps:
       -
