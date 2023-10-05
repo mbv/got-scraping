@@ -46,7 +46,7 @@ jobs:
       -
         # Determine if this is a beta or latest release
         name: Set Release Tag
-        run: echo "RELEASE_TAG=$(if [ ${{ github.event_name }} = release ]; then echo latest; else echo beta; fi)" >> $GITHUB_ENV
+        run: echo "RELEASE_TAG=latest" >> $GITHUB_ENV
       -
         name: Install Dependencies
         run: npm install
