@@ -10,40 +10,13 @@ on:
     types: [ published ]
 
 jobs:
-  build_and_test:
-    name: Build & Test
-    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        node-version: [18, 20]
-
-    steps:
-      -
-        uses: actions/checkout@v3
-      -
-        name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-      -
-        name: Install Dependencies
-        run: npm install
-      -
-        name: Run Tests
-        run: npm test
-        env:
-          APIFY_PROXY_PASSWORD: ${{ secrets.APIFY_TEST_USER_PROXY_PASSWORD }}
-
   lint:
     name: Lint
     runs-on: ubuntu-latest
 
     steps:
       -
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       -
         name: Use Node.js 20
         uses: actions/setup-node@v3
@@ -63,12 +36,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       -
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       -
         uses: actions/setup-node@v3
         with:
-          node-version: 20
-          registry-url: https://registry.npmjs.org/
+          node-version: 20.x'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@mbv'
       -
         # Determine if this is a beta or latest release
         name: Set Release Tag
@@ -85,7 +59,7 @@ jobs:
         name: Publish to NPM
         run: npm publish --tag ${{ env.RELEASE_TAG }} --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.APIFY_SERVICE_ACCOUNT_NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       -
         # Latest version is tagged by the release process so we only tag beta here.
         name: Tag Version

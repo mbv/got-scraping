@@ -1,5 +1,5 @@
 {
-    "name": "got-scraping",
+    "name": "@mbv/got-scraping",
     "version": "4.0.0",
     "description": "HTTP client made for scraping based on got.",
     "engines": {
@@ -63,7 +63,7 @@
     "license": "Apache-2.0",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/apify/got-scraping"
+        "url": "git+https://github.com/mbv/got-scraping"
     },
     "bugs": {
         "url": "https://github.com/apify/got-scraping/issues"
