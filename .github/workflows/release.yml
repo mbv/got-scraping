@@ -41,7 +41,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
-          registry-url: 'https://npm.pkg.github.com'
+          registry-url: 'https://registry.npmjs.org'
           scope: '@mbv'
       -
         # Determine if this is a beta or latest release
@@ -54,7 +54,7 @@ jobs:
         name: Publish to NPM
         run: npm publish --tag ${{ env.RELEASE_TAG }} --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       -
         # Latest version is tagged by the release process so we only tag beta here.
         name: Tag Version
